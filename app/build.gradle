@@ -1,0 +1,102 @@
+apply plugin: 'com.android.application'
+
+//apply plugin: 'com.bytedance.std.tracker'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+
+    defaultConfig {
+        applicationId "com.yzk.launcher"
+        minSdkVersion 21
+        targetSdkVersion 26
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        manifestPlaceholders.put("APPLOG_SCHEME", "【您应用的url_scheme】".toLowerCase())
+        ndk {
+            abiFilters 'armeabi'
+        }
+    }
+
+    signingConfigs {
+        config {
+            keyAlias 'yang'
+            keyPassword '123456'
+            storeFile file('../sign.pkcs12')
+            storePassword '123456'
+        }
+    }
+
+    buildTypes {
+
+        debug1 { // ./gradlew assembleDebug1
+            // 定义 applicationId 后缀
+            applicationIdSuffix ".li"
+            signingConfig signingConfigs.debug
+        }
+
+        debug2 {// ./gradlew assembleDebug2
+            // 定义 applicationId 后缀
+            applicationIdSuffix ".xiang"
+            signingConfig signingConfigs.debug
+        }
+
+        release {
+            minifyEnabled false
+            zipAlignEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'androidx.appcompat:appcompat:1.2.0'
+    implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.1'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    // adapter
+    implementation 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.44'
+    implementation 'androidx.cardview:cardview:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'androidx.recyclerview:recyclerview:1.1.0'
+    // location
+    implementation 'com.amap.api:location:4.2.0'
+    // json
+    implementation 'com.alibaba:fastjson:1.2.38'
+    // xunfei voice
+    implementation files('libs/Msc.jar')
+//    // img selector
+//    implementation 'com.yuyh.imgsel:library:2.0.7'
+//    // glide
+//    implementation 'com.github.bumptech.glide:glide:4.11.0'
+
+//    annotationProcessor 'com.github.bumptech.glide:compiler:4.11.0'
+    // zijie
+    //    implementation 'com.bytedance.applog:RangersAppLog-All-cn:5.2.6'
+//    implementation 'com.bytedance.applog:RangersAppLog-Lite-cn:5.2.6'
+//    implementation('com.applovin.mediation.sdks.bytedance:open_ad_sdk:3.1.0.1') {
+//        exclude group: 'com.bytedance.applog'
+//    }
+    //    implementation(name: 'open_ad_sdk-3.1.0.1', ext: 'aar')
+//    implementation 'com.sensorsdata.provider:SensorsAnalyticsProvider:0.0.2'
+
+}
+
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+    mavenCentral()
+}

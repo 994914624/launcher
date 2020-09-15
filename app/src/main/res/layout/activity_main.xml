@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.yzk.launcher.custom.CustomNestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true"
+    android:background="#000000"
+    android:paddingTop="30dp"
+    android:paddingLeft="8dp"
+    android:paddingRight="8dp"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:descendantFocusability="blocksDescendants"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            app:cardBackgroundColor="#434A54"
+            app:cardCornerRadius="6dp"
+            app:cardUseCompatPadding="true">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:focusable="true"
+                android:orientation="vertical">
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/tv_time_main_top"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:layout_centerVertical="true"
+                        android:text="8:00"
+                        android:gravity="center_horizontal"
+                        android:textColor="#fff"
+                        android:textSize="70sp" />
+                    <TextView
+                        android:id="@+id/tv_am_main_top"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="上午"
+                        android:layout_centerVertical="true"
+                        android:layout_toLeftOf="@+id/tv_time_main_top"
+                        android:gravity="center_horizontal"
+                        android:textColor="#fff" />
+                    <TextView
+                        android:id="@+id/tv_pm_main_top"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="下午"
+                        android:layout_centerVertical="true"
+                        android:layout_toRightOf="@+id/tv_time_main_top"
+                        android:gravity="center_horizontal"
+                        android:textColor="#fff" />
+                </RelativeLayout>
+
+                <TextView
+                    android:id="@+id/tv_date_main_top"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="8月15日 星期六 农历6月26"
+                    android:gravity="center_horizontal"
+                    android:textColor="#fff"
+                    android:layout_marginBottom="8dp"
+                    android:textSize="18sp" />
+
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/main_recyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </RelativeLayout>
+
+        <include layout="@layout/main_item_footer"/>
+
+    </LinearLayout>
+
+
+</com.yzk.launcher.custom.CustomNestedScrollView>
