@@ -9,16 +9,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-//import com.bumptech.glide.Glide;
-//import com.yuyh.library.imgsel.ISNav;
-//import com.yuyh.library.imgsel.common.ImageLoader;
-//import com.yuyh.library.imgsel.config.ISCameraConfig;
-//import com.yuyh.library.imgsel.config.ISListConfig;
 import com.yzk.launcher.activity.AppsActivity;
 import com.yzk.launcher.activity.WeatherActivity;
+import com.yzk.launcher.activity.WebViewActivity;
 import com.yzk.launcher.custom.Lunar;
 
 import java.util.Calendar;
@@ -87,6 +82,18 @@ public class MainPageUtil {
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 打开 WebView
+     */
+    public static void openWebView(Context context) {
+        try {
+            Intent intent = new Intent(context, WebViewActivity.class);
+            context.startActivity(intent);
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }

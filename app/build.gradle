@@ -10,8 +10,8 @@ android {
         applicationId "com.yzk.launcher"
         minSdkVersion 21
         targetSdkVersion 26
-        versionCode 1
-        versionName "1.0"
+        versionCode 2
+        versionName "1.0.1"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
@@ -91,6 +91,8 @@ dependencies {
 //    }
     //    implementation(name: 'open_ad_sdk-3.1.0.1', ext: 'aar')
 //    implementation 'com.sensorsdata.provider:SensorsAnalyticsProvider:0.0.2'
+
+//    implementation 'com.sensorsdata.abtesting:SensorsABTesting:0.0.1'
 
 }
 

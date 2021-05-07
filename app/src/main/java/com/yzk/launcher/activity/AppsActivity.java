@@ -53,7 +53,7 @@ public class AppsActivity extends BaseActivity {
     }
 
     public boolean filterApp(ApplicationInfo info) {
-        if("设置".equals(""+info.loadLabel(getPackageManager()))||"短信".equals(""+info.loadLabel(getPackageManager()))
+        if("相册".equals(""+info.loadLabel(getPackageManager()))||"设置".equals(""+info.loadLabel(getPackageManager()))||"短信".equals(""+info.loadLabel(getPackageManager()))
                 ||"应用商店".equals(""+info.loadLabel(getPackageManager()))||"电话".equals(""+info.loadLabel(getPackageManager()))){
             return true;
         }

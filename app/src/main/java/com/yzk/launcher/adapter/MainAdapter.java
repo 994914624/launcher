@@ -7,6 +7,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.ItemTouchHelper;
 
 import com.chad.library.adapter.base.BaseMultiItemQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
@@ -29,6 +30,7 @@ public class MainAdapter extends BaseMultiItemQuickAdapter<ContactEntity, BaseVi
      * @param data A new list is created out of this one to avoid mutable list
      */
     private Phone phone;
+    private ItemTouchHelper mItemTouchHelper;
 
     public MainAdapter(List<ContactEntity> data, Phone phone) {
         super(data);
@@ -69,7 +71,7 @@ public class MainAdapter extends BaseMultiItemQuickAdapter<ContactEntity, BaseVi
     private void bindContact(final BaseViewHolder helper, final ContactEntity item) {
         ((TextView) helper.getView(R.id.item_contact_name)).setText(item.getName());
         ((ImageView) helper.getView(R.id.item_contact_icon)).setImageBitmap(item.getIcon());
-        helper.getView(R.id.item_contact).setOnClickListener(new View.OnClickListener() {
+        helper.getView(R.id.item_contact_icon).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // TODO call
@@ -77,13 +79,28 @@ public class MainAdapter extends BaseMultiItemQuickAdapter<ContactEntity, BaseVi
                 phone.call(item.getPhoneNumber());
             }
         });
-        helper.getView(R.id.item_contact).setOnLongClickListener(new View.OnLongClickListener() {
+        helper.getView(R.id.item_contact_icon).setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-
-                phone.onContactLongClick(item.getContactId(),helper.getAdapterPosition());
-                return false;
+                // 长按允许拖动
+                if(mItemTouchHelper !=null) {
+                    mItemTouchHelper.startDrag(helper);
+                }
+                return true;
             }
         });
+        // 长按移除联系人
+        helper.getView(R.id.item_contact_name).setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                phone.onContactLongClick(item.getContactId(),helper.getAdapterPosition());
+                return true;
+            }
+        });
+
+    }
+
+    public void setItemTouchHelper(ItemTouchHelper mItemTouchHelper){
+        this.mItemTouchHelper = mItemTouchHelper;
     }
 }

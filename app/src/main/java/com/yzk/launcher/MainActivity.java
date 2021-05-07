@@ -2,9 +2,11 @@ package com.yzk.launcher;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,14 +24,20 @@ import android.widget.Toast;
 
 import com.yzk.launcher.activity.BaseActivity;
 import com.yzk.launcher.adapter.MainAdapter;
+import com.yzk.launcher.adapter.RecycleViewItemTouchHelper;
 import com.yzk.launcher.interfaces.Phone;
 import com.yzk.launcher.custom.CustomStaggeredGridLayoutManager;
 import com.yzk.launcher.entity.ContactEntity;
 import com.yzk.launcher.utils.ContactUtil;
 import com.yzk.launcher.utils.MainPageUtil;
 
+import org.json.JSONArray;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 
@@ -44,8 +52,9 @@ public class MainActivity extends BaseActivity implements Phone {
     private TextView tvDate;
     private View footerView;
     private Handler handler;
+    private ItemTouchHelper mItemTouchHelper;
     // 当前显示的联系人
-    private HashSet<String> displayContactIds = new HashSet<>();
+    private LinkedHashSet<String> displayContactIds = new LinkedHashSet<>();
     private Runnable runnable = new Runnable() {
         @Override
         public void run() {
@@ -59,6 +68,7 @@ public class MainActivity extends BaseActivity implements Phone {
     private final static String WEATHER = "天气";
     private final static String APPS = "应用";
     private final static String PHONE_CALL = "电话";
+    private final static String XI_QU = "戏曲";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,7 +80,7 @@ public class MainActivity extends BaseActivity implements Phone {
         handler.postDelayed(runnable, 30000);
         try {
             // 适配魅族 申请读取联系人权限
-            if((Build.VERSION.SDK_INT < 23) ){
+            if ((Build.VERSION.SDK_INT < 23)) {
                 String[] cols = {ContactsContract.PhoneLookup.DISPLAY_NAME, ContactsContract.CommonDataKinds.Phone.NUMBER};
                 Cursor cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI,
                         cols, null, null, null);
@@ -116,7 +126,7 @@ public class MainActivity extends BaseActivity implements Phone {
             mainAdapter.addData(contactEntity);
             mainAdapter.notifyDataSetChanged();
             // 存文件一份
-            saveDataToSp();
+            saveDataToSp(displayContactIds, getApplicationContext());
             Toast.makeText(this, "添加成功", Toast.LENGTH_SHORT).show();
         } else {
             Toast.makeText(this, "已添加过了", Toast.LENGTH_SHORT).show();
@@ -147,19 +157,19 @@ public class MainActivity extends BaseActivity implements Phone {
     }
 
     private void initAdapter() {
-        String[] names = {WEI_XIN, WEATHER, APPS, PHONE_CALL};
-        int[] bgColors = {0xFF7BB740, 0xFF3C73D3, 0xFF8362D3, 0xFFF3AE35};
-        int[] imgIds = {R.mipmap.icon_wx, R.mipmap.icon_weather, R.mipmap.icon_apps, R.mipmap.icon_call};
+        String[] names = {WEI_XIN, WEATHER, XI_QU, APPS, PHONE_CALL};
+        int[] bgColors = {0xFF7BB740, 0xFF3C73D3, 0xFF8362D3, 0xFFF3AE35, 0xFF50B6AC};
+        int[] imgIds = {R.mipmap.icon_wx, R.mipmap.icon_weather, R.mipmap.icon_xq, R.mipmap.icon_apps, R.mipmap.icon_call};
 
         List<ContactEntity> data = new ArrayList<>();
         // top 四个功能
-        for (int i = 0; i < 4; i++) {
+        for (int i = 0; i < 5; i++) {
             ContactEntity contactEntity = new ContactEntity(names[i], bgColors[i], imgIds[i], 1);
             data.add(contactEntity);
         }
 
         // 填充之前已记录的联系人
-        HashSet<String> hashSet = getDataFromSp();
+        LinkedHashSet<String> hashSet = getDataFromSp();
         for (String contactId : hashSet) {
             displayContactIds.add(contactId);
             data.add(ContactUtil.getContactInfo(contactId, this));
@@ -168,20 +178,11 @@ public class MainActivity extends BaseActivity implements Phone {
         mainAdapter = new MainAdapter(data, this);
         mainAdapter.openLoadAnimation();
         mRecyclerView.setAdapter(mainAdapter);
-    }
 
-    private void setFooterView() {
-        View footerView = getLayoutInflater().inflate(R.layout.main_item_footer, null);
-        footerView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Toast.makeText(MainActivity.this, "添加联系人", Toast.LENGTH_SHORT).show();
-                MainPageUtil.openWeather(MainActivity.this);
-                ContactUtil.pickContact(MainActivity.this);
-            }
-        });
-        mainAdapter.setFooterView(footerView);
-        mainAdapter.notifyDataSetChanged();
+        // 拖动
+        mItemTouchHelper = new ItemTouchHelper(new RecycleViewItemTouchHelper(mainAdapter, getApplicationContext()));
+        mItemTouchHelper.attachToRecyclerView(mRecyclerView);
+        mainAdapter.setItemTouchHelper(mItemTouchHelper);
     }
 
     @Override
@@ -208,6 +209,11 @@ public class MainActivity extends BaseActivity implements Phone {
             case PHONE_CALL:
                 MainPageUtil.openDialPage(this);
                 break;
+            case XI_QU:
+                MainPageUtil.openWebView(this);
+                break;
+            default:
+                break;
         }
     }
 
@@ -224,7 +230,7 @@ public class MainActivity extends BaseActivity implements Phone {
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         displayContactIds.remove(contactId);
-                        saveDataToSp();
+                        saveDataToSp(displayContactIds, getApplicationContext());
                         mainAdapter.remove(position);
                         Toast.makeText(MainActivity.this, "移除联系人", Toast.LENGTH_SHORT).show();
                     }
@@ -240,17 +246,42 @@ public class MainActivity extends BaseActivity implements Phone {
     /**
      * 从 SP 读取存的 contactId
      */
-    private HashSet<String> getDataFromSp() {
-        SharedPreferences sharedPreferences = getSharedPreferences("contacts_data", MODE_PRIVATE);
-        return (HashSet<String>) sharedPreferences.getStringSet("data", displayContactIds);
+    private LinkedHashSet<String> getDataFromSp() {
+        try {
+            SharedPreferences sharedPreferences = getSharedPreferences("contacts_data", MODE_PRIVATE);
+            String str = sharedPreferences.getString("contact_id",null);
+            if(str != null){
+                str = str.replace(" ","");
+                String[] strArr = str.split(",");
+                Log.e("eeee","----getDataFromSp---"+strArr.length);
+                LinkedHashSet<String> linkedHashSet = new LinkedHashSet<String>(Arrays.asList(strArr));
+                Log.e("eeee22","----getDataFromSp---"+linkedHashSet.toString());
+                return linkedHashSet;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        Collection
+        return displayContactIds;
     }
 
     /**
      * contactId 存 SP
      */
-    private void saveDataToSp() {
-        SharedPreferences sharedPreferences = getSharedPreferences("contacts_data", MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putStringSet("data", displayContactIds).apply();
+    public static void saveDataToSp(LinkedHashSet displayContactIds, Context context) {
+        if (context == null) return;
+        try {
+            SharedPreferences sharedPreferences = context.getSharedPreferences("contacts_data", MODE_PRIVATE);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            String str = displayContactIds.toString();
+            str = str.replace("[","");
+            str = str.replace("]","");
+            str = str.replace(" ","");
+            Log.e("eeee","----saveDataToSp---"+str);
+
+            editor.putString("contact_id", str).apply();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
